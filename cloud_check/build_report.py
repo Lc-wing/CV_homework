@@ -193,6 +193,7 @@ def story():
     n_pass = len(re.findall(r"^\[PASS\]", VERIFY, re.M))
     n_all = n_pass + len(re.findall(r"^\[FAIL\]", VERIFY, re.M))
     s = []
+    scipy_conv = mono("scipy.ndimage.convolve(mode='constant')")
 
     # ------------------------------------------------------------ overview
     s.append(P("Overview", "h1"))
@@ -202,7 +203,7 @@ def story():
         f"{mono('blob_detection.py')} (Task 5). Every script was run on a GitHub Actions Ubuntu runner "
         "(Python 3.11, NumPy, SciPy, Matplotlib, Pillow); all figures and numbers in this report come from that run. "
         f"A separate verification script ran {n_all} automatic checks, and all {n_pass} passed. Among them: "
-        f"{mono('convolve()')} matches {mono('scipy.ndimage.convolve(mode=\"constant\")')} exactly for nine kernel "
+        f"{mono('convolve()')} matches {scipy_conv} exactly for nine kernel "
         "shapes (including even sizes), the convolutional Harris detector matches a quadruple-loop "
         "brute-force version, and the Task 5 Gaussian blur matches SciPy's Gaussian filter to within 10<super>-14</super>. "
         "The full check list is in the appendix."))
