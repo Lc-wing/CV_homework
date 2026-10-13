@@ -64,35 +64,38 @@ def morphology_sweep(name):
         row = [bd.count_components(bd.morphology_mask(image, t, e, e, 1), 12, 400)[0] for e in range(4)]
         print(f"  {t:.2f}     | {row}")
 
-    flats = {bg: image - bd.gaussian_filter(image, bg) for bg in (10, 15, 20)}
+    combos = [(1, 1), (2, 2), (3, 3), (2, 1), (3, 1), (3, 2), (4, 2), (4, 3)]
+    flats = {bg: image - bd.gaussian_filter(image, bg) for bg in (10, 15)}
     for bg, flat in flats.items():
         print(f"background_sigma {bg}: flattened p50 {np.percentile(flat, 50):.3f} "
-              f"p75 {np.percentile(flat, 75):.3f} p90 {np.percentile(flat, 90):.3f} "
-              f"max {flat.max():.3f} otsu-ish {otsu(np.clip(flat + 0.5, 0, 1)) - 0.5:.3f}")
-        print("  threshold | erosion=dilation 0..3 (closing 1, area 12-400) | median area, >400 at e=1")
-        for t in [0.0, 0.03, 0.06, 0.09, 0.12, 0.15]:
-            row = []
-            for e in range(4):
-                mask = bd.morphology_mask(flat, t, e, e, 1)
-                n, labels, kept = bd.count_components(mask, 12, 400)
-                row.append(n)
-                if e == 1:
-                    areas = np.bincount(labels.ravel())[1:]
-                    med = np.median(areas) if len(areas) else 0
-                    big = int((areas > 400).sum())
-                    small = int((areas < 12).sum())
-            print(f"    {t:.2f}    | {row} | median {med:.0f}, >400: {big}, <12: {small}")
+              f"p75 {np.percentile(flat, 75):.3f} p90 {np.percentile(flat, 90):.3f} max {flat.max():.3f}")
+        for min_area in (8, 15):
+            print(f"  min_area {min_area}, max_area 400, closing 1; columns (e,d) = {combos}")
+            for t in [0.03, 0.06, 0.09, 0.12, 0.15, 0.18]:
+                row = []
+                for e, d in combos:
+                    mask = bd.morphology_mask(flat, t, e, d, 1)
+                    row.append(bd.count_components(mask, min_area, 400)[0])
+                print(f"    t {t:.2f} | {row}")
+        mask = bd.morphology_mask(flat, 0.09, 3, 1, 1)
+        _, labels, _ = bd.count_components(mask, 8, 400)
+        areas = np.bincount(labels.ravel())[1:]
+        print(f"  areas at t 0.09 (3,1): median {np.median(areas):.0f}, "
+              f"p10 {np.percentile(areas, 10):.0f}, p90 {np.percentile(areas, 90):.0f}, "
+              f"<8: {(areas < 8).sum()}, >400: {(areas > 400).sum()}")
+        print("  closing 0 vs 1 at t 0.09:",
+              [(c, bd.count_components(bd.morphology_mask(flat, 0.09, 3, 1, c), 8, 400)[0]) for c in (0, 1, 2)])
 
-    bg = 15
-    show_t = [0.03, 0.06, 0.09, 0.12]
-    show_e = [0, 1, 2, 3]
-    fig, axs = plt.subplots(len(show_t), len(show_e), figsize=(4 * len(show_e), 4 * len(show_t)))
+    bg = 10
+    show_t = [0.06, 0.09, 0.12, 0.15]
+    show_c = [(2, 2), (3, 1), (3, 2), (4, 2)]
+    fig, axs = plt.subplots(len(show_t), len(show_c), figsize=(4 * len(show_c), 4 * len(show_t)))
     for i, t in enumerate(show_t):
-        for j, e in enumerate(show_e):
-            mask = bd.morphology_mask(flats[bg], t, e, e, 1)
-            n, labels, kept = bd.count_components(mask, 12, 400)
+        for j, (e, d) in enumerate(show_c):
+            mask = bd.morphology_mask(flats[bg], t, e, d, 1)
+            n, labels, kept = bd.count_components(mask, 8, 400)
             axs[i, j].imshow(label_overlay(image, labels, kept), interpolation="nearest")
-            axs[i, j].set_title(f"bg={bg} t={t:.2f} e=d={e}: {n}")
+            axs[i, j].set_title(f"bg={bg} t={t:.2f} e={e} d={d}: {n}")
             axs[i, j].axis("off")
     plt.tight_layout()
     plt.savefig(OUT / f"morph_{Path(name).stem}.png", dpi=80)

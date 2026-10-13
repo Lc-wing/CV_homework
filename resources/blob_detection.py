@@ -120,15 +120,13 @@ def morphology_mask(
       b. Erosion (``erosion_iterations``) deletes isolated noise pixels and
          cuts the thin bridges where two cells only touch weakly.
       c. Dilation (``dilation_iterations``) grows the surviving cores back.
-         Each dilation is restricted to the thresholded foreground, so cells
-         recover their size without re-merging across background.
-    Steps b and c together form an opening.
+    With equal iteration counts, steps b and c form an opening. Using fewer
+    dilations than erosions keeps the cores of touching cells apart.
     """
     image = np.asarray(image, dtype=np.float64)
     if background_sigma > 0:
         image = image - gaussian_filter(image, background_sigma)
-    foreground = image > threshold
-    mask = foreground
+    mask = image > threshold
     if closing_iterations > 0:
         mask = ndimage.binary_dilation(mask, STRUCTURE, iterations=closing_iterations)
         mask = ndimage.binary_erosion(
@@ -137,9 +135,7 @@ def morphology_mask(
     if erosion_iterations > 0:
         mask = ndimage.binary_erosion(mask, STRUCTURE, iterations=erosion_iterations)
     if dilation_iterations > 0:
-        mask = ndimage.binary_dilation(
-            mask, STRUCTURE, iterations=dilation_iterations, mask=foreground | mask
-        )
+        mask = ndimage.binary_dilation(mask, STRUCTURE, iterations=dilation_iterations)
     return mask
 
 
