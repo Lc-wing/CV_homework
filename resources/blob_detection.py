@@ -242,19 +242,29 @@ def detect_blobs(path, sigma_small, sigma_large, neighborhood_size, threshold_re
     return int(maxima.sum())
 
 
+SELECTED = ["002cell.png", "050cell.png", "100cell.png", "150cell.png"]
+DEFAULT_PARAMETERS = {
+    "threshold": 0.28,
+    "closing_iterations": 1,
+    "erosion_iterations": 1,
+    "dilation_iterations": 1,
+    "min_area": 12,
+    "max_area": 400,
+}
+# Per-image settings used in the report.
+IMAGE_PARAMETERS = {name: dict(DEFAULT_PARAMETERS) for name in SELECTED}
+
+# Task 5(a) settings on SELECTED[0].
+SCALE_PAIRS = [(1.5, 2.4), (2.5, 4.0), (3.0, 4.8)]
+DOG_SIGMAS = (2.5, 4.0)
+DOG_NEIGHBORHOOD = 9
+DOG_THRESHOLD_REL = 0.30
+
+
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    selected = ["002cell.png", "050cell.png", "100cell.png", "150cell.png"]
-    default_parameters = {
-        "threshold": 0.28,
-        "closing_iterations": 1,
-        "erosion_iterations": 1,
-        "dilation_iterations": 1,
-        "min_area": 12,
-        "max_area": 400,
-    }
-    # Per-image settings used in the report.
-    image_parameters = {name: dict(default_parameters) for name in selected}
+    selected = SELECTED
+    image_parameters = IMAGE_PARAMETERS
 
     print("Task 5(b): morphology cell counting")
     morphology_counts = {}
@@ -269,17 +279,16 @@ def main():
 
     # Task 5(a): Blob-detection experiment for one selected image.
     blob_path = CELL_DIR / selected[0]
-    neighborhood_size, threshold_rel = 9, 0.30
+    neighborhood_size, threshold_rel = DOG_NEIGHBORHOOD, DOG_THRESHOLD_REL
     print(f"Task 5(a): DoG blob detection on {blob_path.name}")
-    scale_pairs = [(1.5, 2.4), (2.5, 4.0), (3.0, 4.8)]
-    for sigma_small, sigma_large in scale_pairs:
+    for sigma_small, sigma_large in SCALE_PAIRS:
         tag = f"_s{sigma_small:g}_{sigma_large:g}"
         n = detect_blobs(blob_path, sigma_small, sigma_large,
                          neighborhood_size, threshold_rel, tag=tag)
         print(f"  sigma = ({sigma_small}, {sigma_large}), neighborhood = "
               f"{neighborhood_size}, threshold_rel = {threshold_rel}: {n} DoG maxima")
 
-    sigma_small, sigma_large = 2.5, 4.0
+    sigma_small, sigma_large = DOG_SIGMAS
     blob_count = detect_blobs(blob_path, sigma_small, sigma_large,
                               neighborhood_size, threshold_rel)
     print(f"{blob_path.name}: {blob_count} DoG maxima "

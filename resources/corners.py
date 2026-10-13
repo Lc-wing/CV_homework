@@ -26,14 +26,17 @@ def corner_score(image, u=5, v=5, window_size=(5, 5)):
     Output- results: a image of size H x W
     """
     H, W = image.shape
+    ph, pw = window_size[0] // 2, window_size[1] // 2
     pu, pv = abs(u), abs(v)
-    padded = np.pad(image, ((pv, pv), (pu, pu)), mode='constant')
-    # shifted[y, x] = I(x + u, y + v), zero outside the image
-    shifted = padded[pv + v:pv + v + H, pu + u:pu + u + W]
-    diff_sq = (shifted - image) ** 2
+    padded = np.pad(image, ((ph + pv, ph + pv), (pw + pu, pw + pu)), mode='constant')
+    # Both grids cover the image extended by half a window on each side;
+    # shifted[y, x] = I(x + u, y + v) with I = 0 outside the image.
+    base = padded[pv:pv + H + 2 * ph, pu:pu + W + 2 * pw]
+    shifted = padded[pv + v:pv + v + H + 2 * ph, pu + u:pu + u + W + 2 * pw]
+    diff_sq = (shifted - base) ** 2
     window = np.ones(window_size)
     output = scipy.ndimage.convolve(diff_sq, window, mode='constant', cval=0.0)
-    return output
+    return output[ph:ph + H, pw:pw + W]
 
 
 def gaussian_window(window_size, sigma=None):

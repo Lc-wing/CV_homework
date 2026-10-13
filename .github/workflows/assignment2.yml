@@ -1,0 +1,63 @@
+name: assignment2-check
+
+on:
+  push:
+    branches: [assignment2]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install numpy scipy matplotlib pillow
+
+      - name: Run assignment scripts
+        shell: bash {0}
+        run: |
+          mkdir -p cloud_check/run_logs
+          python -c "import sys, numpy, scipy, matplotlib, PIL; print(sys.version); print('numpy', numpy.__version__, 'scipy', scipy.__version__, 'matplotlib', matplotlib.__version__, 'pillow', PIL.__version__)" > cloud_check/run_logs/env.txt
+          cd resources
+          for s in filters corners blob_detection; do
+            python $s.py > ../cloud_check/run_logs/$s.txt 2>&1
+            echo "exit=$?" >> ../cloud_check/run_logs/$s.txt
+          done
+
+      - name: Verify
+        shell: bash {0}
+        run: |
+          python cloud_check/verify.py > cloud_check/run_logs/verify.txt 2>&1
+          echo "exit=$?" >> cloud_check/run_logs/verify.txt
+          cat cloud_check/run_logs/verify.txt
+
+      - name: Tune Task 5
+        shell: bash {0}
+        run: |
+          python cloud_check/tune_task5.py > cloud_check/run_logs/tune_task5.txt 2>&1
+          echo "exit=$?" >> cloud_check/run_logs/tune_task5.txt
+
+      - name: Report figures
+        shell: bash {0}
+        run: |
+          if [ -f cloud_check/make_figures.py ]; then
+            python cloud_check/make_figures.py > cloud_check/run_logs/make_figures.txt 2>&1
+            echo "exit=$?" >> cloud_check/run_logs/make_figures.txt
+          fi
+
+      - name: Publish outputs to assignment2-outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B assignment2-outputs
+          git add -A resources cloud_check
+          git commit -q -m "CI outputs for ${GITHUB_SHA::7}" || true
+          git push -f origin assignment2-outputs
