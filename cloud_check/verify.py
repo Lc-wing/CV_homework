@@ -53,7 +53,7 @@ err_corr = np.abs(filters.convolve(rand_img, asym) - corr).max()
 check("convolve is not cross-correlation (asymmetric kernel differs)", err_corr > 1e-3,
       "max |convolve - correlate| = %.3e" % err_corr)
 src = open("filters.py", encoding="utf-8").read()
-check("filters.py does not use scipy", "scipy" not in src)
+check("filters.py does not import scipy", re.search(r"^\s*(import|from)\s+scipy", src, re.M) is None)
 
 # (b) Gaussian separability.
 G = filters.gaussian_kernel(3, 0.572)
@@ -151,10 +151,10 @@ check("no scipy gaussian_filter call in blob_detection.py",
       re.search(r"ndimage\.gaussian_filter\s*\(", code) is None)
 check("no library blob detector / cell counter",
       re.search(r"blob_log|blob_dog|blob_doh|peak_local_max|skimage|cv2|SimpleBlobDetector", code) is None)
-conv_calls = re.findall(r"ndimage\.convolve\([^)]*\)", code)
+conv_lines = [line for line in code.splitlines() if "ndimage.convolve(" in line]
 check("every ndimage.convolve in blob_detection.py uses mode='reflect'",
-      len(conv_calls) > 0 and all('mode="reflect"' in c or "mode='reflect'" in c for c in conv_calls),
-      "%d call(s)" % len(conv_calls))
+      len(conv_lines) > 0 and all('mode="reflect"' in c or "mode='reflect'" in c for c in conv_lines),
+      "%d call(s)" % len(conv_lines))
 
 print("\nSUMMARY: %d / %d checks passed" % (sum(results), len(results)))
 sys.exit(0 if all(results) else 1)

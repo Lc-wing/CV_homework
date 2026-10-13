@@ -59,15 +59,40 @@ def morphology_sweep(name):
                 big = int((areas > 400).sum())
         print(f"  {t:.2f}     | {row} | median area {med:.0f}, >400: {big}")
 
-    show_t = [0.25, 0.30, 0.35, 0.40]
+    print("global threshold 0.50-0.70 | erosion=dilation 0..3")
+    for t in [0.50, 0.55, 0.60, 0.65, 0.70]:
+        row = [bd.count_components(bd.morphology_mask(image, t, e, e, 1), 12, 400)[0] for e in range(4)]
+        print(f"  {t:.2f}     | {row}")
+
+    for bg in (10, 15, 25):
+        flat = image - bd.gaussian_filter(image, bg)
+        print(f"background_sigma {bg}: flattened p50 {np.percentile(flat, 50):.3f} "
+              f"p75 {np.percentile(flat, 75):.3f} p90 {np.percentile(flat, 90):.3f} "
+              f"max {flat.max():.3f} otsu-ish {otsu(np.clip(flat + 0.5, 0, 1)) - 0.5:.3f}")
+        print("  threshold | erosion=dilation 0..3 (closing 1, area 12-400) | median area, >400 at e=1")
+        for t in [0.0, 0.03, 0.06, 0.09, 0.12, 0.15]:
+            row = []
+            for e in range(4):
+                mask = bd.morphology_mask(image, t, e, e, 1, bg)
+                n, labels, kept = bd.count_components(mask, 12, 400)
+                row.append(n)
+                if e == 1:
+                    areas = np.bincount(labels.ravel())[1:]
+                    med = np.median(areas) if len(areas) else 0
+                    big = int((areas > 400).sum())
+                    small = int((areas < 12).sum())
+            print(f"    {t:.2f}    | {row} | median {med:.0f}, >400: {big}, <12: {small}")
+
+    bg = 15
+    show_t = [0.03, 0.06, 0.09, 0.12]
     show_e = [0, 1, 2, 3]
     fig, axs = plt.subplots(len(show_t), len(show_e), figsize=(4 * len(show_e), 4 * len(show_t)))
     for i, t in enumerate(show_t):
         for j, e in enumerate(show_e):
-            mask = bd.morphology_mask(image, t, e, e, 1)
+            mask = bd.morphology_mask(image, t, e, e, 1, bg)
             n, labels, kept = bd.count_components(mask, 12, 400)
             axs[i, j].imshow(label_overlay(image, labels, kept), interpolation="nearest")
-            axs[i, j].set_title(f"t={t:.2f} e=d={e}: {n}")
+            axs[i, j].set_title(f"bg={bg} t={t:.2f} e=d={e}: {n}")
             axs[i, j].axis("off")
     plt.tight_layout()
     plt.savefig(OUT / f"morph_{Path(name).stem}.png", dpi=80)
@@ -117,8 +142,32 @@ def zoom(name):
     plt.close()
 
 
+def dog_zoom(name):
+    image = bd.read_gray(bd.CELL_DIR / name)
+    pairs = [(2.0, 3.2), (2.5, 4.0), (3.0, 4.8)]
+    quads = [(0, 0), (128, 128)]
+    fig, axs = plt.subplots(len(quads), len(pairs), figsize=(6 * len(pairs), 6 * len(quads)))
+    for j, (s1, s2) in enumerate(pairs):
+        m = bd.find_blob_maxima(bd.difference_of_gaussians(image, s1, s2), 9, 0.3)
+        for i, (r0, c0) in enumerate(quads):
+            ax = axs[i, j]
+            ax.imshow(image[r0:r0 + 128, c0:c0 + 128], cmap="gray", interpolation="nearest",
+                      extent=(c0, c0 + 128, r0 + 128, r0))
+            rows, cols = np.nonzero(m[r0:r0 + 128, c0:c0 + 128])
+            for r, c in zip(rows, cols):
+                ax.add_patch(Circle((c0 + c + 0.5, r0 + r + 0.5), np.sqrt(2) * s1,
+                                    fill=False, color="yellow", lw=1))
+                ax.plot(c0 + c + 0.5, r0 + r + 0.5, "r.", ms=3)
+            ax.set_title(f"sigma=({s1},{s2}) rows {r0}+ cols {c0}+: {len(rows)}")
+            ax.axis("off")
+    plt.tight_layout()
+    plt.savefig(OUT / f"dog_zoom_{Path(name).stem}.png", dpi=60)
+    plt.close()
+
+
 if __name__ == "__main__":
     for name in bd.SELECTED:
         morphology_sweep(name)
     dog_sweep(bd.SELECTED[0])
     zoom(bd.SELECTED[0])
+    dog_zoom(bd.SELECTED[0])

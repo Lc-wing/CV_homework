@@ -98,6 +98,7 @@ def morphology_mask(
     erosion_iterations=1,
     dilation_iterations=2,
     closing_iterations=1,
+    background_sigma=0,
 ):
     """Segment cells and clean the mask with erosion and dilation.
 
@@ -109,6 +110,10 @@ def morphology_mask(
 
     The parameters above are only starting points; tune them per image.
 
+    Scalar image: if ``background_sigma`` > 0, a wide Gaussian blur of the
+    image (the slowly varying illumination and out-of-focus haze) is
+    subtracted first, so one threshold works across the whole field.
+
     Operation order (structuring element: 3x3 cross, iterated):
       a. Closing (dilate, then erode, ``closing_iterations`` times each) fills
          pinholes and dark gaps inside a cell before anything is removed.
@@ -119,7 +124,10 @@ def morphology_mask(
          recover their size without re-merging across background.
     Steps b and c together form an opening.
     """
-    foreground = np.asarray(image) > threshold
+    image = np.asarray(image, dtype=np.float64)
+    if background_sigma > 0:
+        image = image - gaussian_filter(image, background_sigma)
+    foreground = image > threshold
     mask = foreground
     if closing_iterations > 0:
         mask = ndimage.binary_dilation(mask, STRUCTURE, iterations=closing_iterations)
@@ -208,6 +216,7 @@ def process_cell(path, parameters):
         erosion_iterations=parameters["erosion_iterations"],
         dilation_iterations=parameters["dilation_iterations"],
         closing_iterations=parameters.get("closing_iterations", 1),
+        background_sigma=parameters.get("background_sigma", 0),
     )
     count, labels, kept_ids = count_components(
         mask,
@@ -215,7 +224,10 @@ def process_cell(path, parameters):
         max_area=parameters["max_area"],
     )
     stem = path.stem
-    save_mask(image > parameters["threshold"], OUTPUT_DIR / f"{stem}_threshold.png")
+    raw_mask = morphology_mask(
+        image, parameters["threshold"], 0, 0, 0, parameters.get("background_sigma", 0)
+    )
+    save_mask(raw_mask, OUTPUT_DIR / f"{stem}_threshold.png")
     save_mask(mask, OUTPUT_DIR / f"{stem}_mask.png")
     save_component_overlay(
         path,
@@ -305,7 +317,7 @@ def main():
     base = image_parameters[blob_path.name]
     for erosion in (0, 1, 2, 3):
         mask = morphology_mask(image, base["threshold"], erosion, erosion,
-                               base["closing_iterations"])
+                               base["closing_iterations"], base.get("background_sigma", 0))
         n, _, _ = count_components(mask, base["min_area"], base["max_area"])
         print(f"  morphology erosion = dilation = {erosion}: {n} components")
 
