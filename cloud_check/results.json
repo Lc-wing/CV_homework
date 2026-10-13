@@ -1,0 +1,299 @@
+{
+  "t1": {
+    "kernel": [
+      [
+        0.0229,
+        0.1055,
+        0.0229
+      ],
+      [
+        0.1055,
+        0.4864,
+        0.1055
+      ],
+      [
+        0.0229,
+        0.1055,
+        0.0229
+      ]
+    ],
+    "kernel_1d": [
+      0.1513,
+      0.6975,
+      0.1513
+    ],
+    "sep_kernel_err": 1.1102230246251565e-16,
+    "sep_image_err": 1.1368683772161603e-13,
+    "sum_0572": 1.000088752326915,
+    "sum_2": 0.30419247439225205,
+    "kernel_2": [
+      [
+        0.031,
+        0.0351,
+        0.031
+      ],
+      [
+        0.0351,
+        0.0398,
+        0.0351
+      ],
+      [
+        0.031,
+        0.0351,
+        0.031
+      ]
+    ],
+    "orig": {
+      "min": 0.0,
+      "max": 255.0,
+      "range": 255.0,
+      "mean": 95.55635818337618
+    },
+    "raw_0572": {
+      "min": 3.0592994273474945,
+      "max": 248.3506270113344,
+      "range": 245.2913275839869,
+      "mean": 95.4555036782141
+    },
+    "norm_0572": {
+      "min": 3.0590279315004754,
+      "max": 248.32858727137452,
+      "range": 245.26955933987404,
+      "mean": 95.44703253197974
+    },
+    "raw_2": {
+      "min": 1.220987347773837,
+      "max": 74.96602842071691,
+      "range": 73.74504107294307,
+      "mean": 28.997381989505755
+    },
+    "edge_orig": {
+      "min": 0.0,
+      "max": 295.48096385384963,
+      "range": 295.48096385384963,
+      "mean": 22.653947948554098
+    },
+    "edge_blur": {
+      "min": 0.0,
+      "max": 238.97523405503134,
+      "range": 238.97523405503134,
+      "mean": 19.044995783272434
+    }
+  },
+  "t2": {
+    "corr": 0.9674746600032749,
+    "ratio": 2.9916287505032266,
+    "Gx": {
+      "min": -915.0,
+      "max": 955.0,
+      "range": 1870.0,
+      "mean": 0.9085218508997429
+    },
+    "Gy": {
+      "min": -929.0,
+      "max": 889.0,
+      "range": 1818.0,
+      "mean": 0.9945029991431019
+    },
+    "mag": {
+      "min": 0.0,
+      "max": 955.1177937825261,
+      "range": 955.1177937825261,
+      "mean": 85.17371844167411
+    }
+  },
+  "t3": {
+    "L1": {
+      "min": -350.0,
+      "max": 331.0,
+      "range": 681.0,
+      "mean": -0.7227677806341045
+    },
+    "L2": {
+      "min": -29750.0,
+      "max": 26177.0,
+      "range": 55927.0,
+      "mean": 272.5620351328192
+    },
+    "sum1": 0,
+    "sum2": 4,
+    "dog_scale": 0.8723686187397536,
+    "dog_sum": 2.3765711620882257e-16,
+    "log_sum": -7.101012751773838e-07,
+    "dog_rel_err": 0.04578337003328518,
+    "log50_center": -0.0004,
+    "dog_center": -0.00045161991611117856
+  },
+  "t4": {
+    "R": {
+      "min": -3442101.196469862,
+      "max": 10298082.750231417,
+      "range": 13740183.946701279,
+      "mean": -4427.725368217866
+    },
+    "n_corners": 429,
+    "frac_negative": 0.28684661525278493,
+    "bf_err_crop": 9.313225746154785e-09
+  },
+  "t5a": {
+    "image": "002cell.png",
+    "sigmas": [
+      2.5,
+      4.0
+    ],
+    "neighborhood": 9,
+    "threshold_rel": 0.3,
+    "resp_max": 0.21775872640737803,
+    "abs_threshold": 0.06532761792221341,
+    "count": 167,
+    "pairs": [
+      {
+        "sigmas": [
+          1.5,
+          2.4
+        ],
+        "count": 185
+      },
+      {
+        "sigmas": [
+          2.0,
+          3.2
+        ],
+        "count": 176
+      },
+      {
+        "sigmas": [
+          2.5,
+          4.0
+        ],
+        "count": 167
+      },
+      {
+        "sigmas": [
+          3.0,
+          4.8
+        ],
+        "count": 150
+      },
+      {
+        "sigmas": [
+          3.5,
+          5.6
+        ],
+        "count": 134
+      }
+    ],
+    "rel_sweep": {
+      "0.1": 167,
+      "0.2": 167,
+      "0.3": 167,
+      "0.4": 149,
+      "0.5": 107
+    },
+    "nb_sweep": {
+      "5": 171,
+      "7": 169,
+      "9": 167,
+      "11": 158,
+      "13": 153
+    }
+  },
+  "t5b": {
+    "002cell.png": {
+      "params": {
+        "background_sigma": 10,
+        "threshold": 0.12,
+        "closing_iterations": 1,
+        "erosion_iterations": 3,
+        "dilation_iterations": 2,
+        "min_area": 15,
+        "max_area": 400
+      },
+      "count": 114,
+      "n_components": 115,
+      "rejected_small": 1,
+      "rejected_large": 0,
+      "median_area_kept": 54.5
+    },
+    "050cell.png": {
+      "params": {
+        "background_sigma": 10,
+        "threshold": 0.12,
+        "closing_iterations": 1,
+        "erosion_iterations": 3,
+        "dilation_iterations": 2,
+        "min_area": 15,
+        "max_area": 400
+      },
+      "count": 111,
+      "n_components": 111,
+      "rejected_small": 0,
+      "rejected_large": 0,
+      "median_area_kept": 56.0
+    },
+    "100cell.png": {
+      "params": {
+        "background_sigma": 10,
+        "threshold": 0.15,
+        "closing_iterations": 1,
+        "erosion_iterations": 3,
+        "dilation_iterations": 2,
+        "min_area": 15,
+        "max_area": 400
+      },
+      "count": 112,
+      "n_components": 116,
+      "rejected_small": 4,
+      "rejected_large": 0,
+      "median_area_kept": 47.0
+    },
+    "150cell.png": {
+      "params": {
+        "background_sigma": 10,
+        "threshold": 0.12,
+        "closing_iterations": 1,
+        "erosion_iterations": 3,
+        "dilation_iterations": 2,
+        "min_area": 15,
+        "max_area": 400
+      },
+      "count": 129,
+      "n_components": 131,
+      "rejected_small": 1,
+      "rejected_large": 1,
+      "median_area_kept": 56.0
+    },
+    "baseline_002cell.png": {
+      "params": {
+        "background_sigma": 0,
+        "threshold": 0.28,
+        "closing_iterations": 1,
+        "erosion_iterations": 1,
+        "dilation_iterations": 1,
+        "min_area": 12,
+        "max_area": 400
+      },
+      "count": 14,
+      "largest_area": 43868
+    }
+  },
+  "t5c": {
+    "threshold_sweep": {
+      "0.03": 93,
+      "0.06": 100,
+      "0.09": 106,
+      "0.12": 114,
+      "0.15": 120,
+      "0.18": 117,
+      "0.21": 113
+    },
+    "erosion_sweep": {
+      "1": 88,
+      "2": 97,
+      "3": 114,
+      "4": 103
+    },
+    "dog": 167,
+    "morph": 114
+  }
+}

@@ -1,0 +1,39 @@
+[PASS] convolve vs scipy, kernel 3x3: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 1x3: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 3x1: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 5x5: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 9x9: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 1x1: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 2x2: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 4x3: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, kernel 2x5: max abs diff = 0.000e+00
+[PASS] convolve vs scipy, grace_hopper with kernel_LoG2: max abs diff = 0.000e+00
+[PASS] convolve is not cross-correlation (asymmetric kernel differs): max |convolve - correlate| = 1.084e+01
+[PASS] filters.py does not import scipy: 
+[PASS] 2D Gaussian = Gy @ Gx: max diff = 1.110e-16
+[PASS] I*G = (I*Gy)*Gx on the full image: max abs diff = 1.137e-13
+    kernel sum sigma=0.572: 1.000089, sigma=2: 0.304192
+[PASS] edge_detection on horizontal ramp: Ix = 2, Iy = 0 (interior): Ix interior unique = [2.]
+[PASS] edge_detection on vertical ramp: Iy = 2, Ix = 0 (interior): Iy interior unique = [2.]
+[PASS] GS * kx (full): 
+[[ 1  2  0 -2 -1]
+ [ 2  4  0 -4 -2]
+ [ 1  2  0 -2 -1]]
+[PASS] Sx = [1,2,1]^T * [1,0,-1]: 
+[PASS] corr(I*Sx, (I*GS)*kx) > 0.9: corr = 0.9675
+[PASS] harris fast vs brute force (grace_hopper crop 40x40): max abs diff = 9.313e-09
+[PASS] harris fast vs brute force (random 30x30): max abs diff = 5.588e-08
+[PASS] corner_score vs brute-force SSD, (u, v) = (5, 5): max abs diff = 0.000e+00
+[PASS] corner_score vs brute-force SSD, (u, v) = (0, 5): max abs diff = 0.000e+00
+[PASS] corner_score vs brute-force SSD, (u, v) = (-5, 0): max abs diff = 0.000e+00
+[PASS] blob gaussian_filter vs scipy, sigma = 1.5: max abs diff = 9.992e-16, kernel sum = 1.000000000000
+[PASS] blob gaussian_filter vs scipy, sigma = 2.5: max abs diff = 1.554e-15, kernel sum = 1.000000000000
+[PASS] blob gaussian_filter vs scipy, sigma = 4.0: max abs diff = 2.331e-15, kernel sum = 1.000000000000
+[PASS] DoG positive at bright blob center: response = 0.2296, argmax = (32, 32)
+[PASS] one maximum on a single synthetic blob: maxima at [(32, 32)]
+[PASS] no scipy gaussian_filter call in blob_detection.py: 
+[PASS] no library blob detector / cell counter: 
+[PASS] every ndimage.convolve in blob_detection.py uses mode='reflect': 1 call(s)
+
+SUMMARY: 32 / 32 checks passed
+exit=0

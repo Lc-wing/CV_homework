@@ -1,0 +1,11 @@
+./feature_detection/corner_score.png is saved!
+./feature_detection/corner_score05.png is saved!
+./feature_detection/corner_score0-5.png is saved!
+./feature_detection/corner_score50.png is saved!
+./feature_detection/corner_score-50.png is saved!
+./feature_detection/harris_response.png is saved!
+Task 4(b): Harris response min = -3442101.1965, max = 10298082.7502
+./feature_detection/harris_heatmap.png is saved!
+Task 4(b): 429 corners above 1% of max response
+./feature_detection/harris_corners_overlay.png is saved!
+exit=0

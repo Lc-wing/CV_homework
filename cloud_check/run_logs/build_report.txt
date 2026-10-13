@@ -1,0 +1,11 @@
+Warning: failed to launch javaldx - java may not function correctly
+convert /home/runner/work/CV_homework/CV_homework/cloud_check/report/tmp/cover.docx as a Writer document -> /home/runner/work/CV_homework/CV_homework/cloud_check/report/tmp/cover.pdf using filter : writer_pdf_Export
+pages: 18
+wrote /home/runner/work/CV_homework/CV_homework/cloud_check/report/李昌硕_Assignment2.pdf and /home/runner/work/CV_homework/CV_homework/cloud_check/report/李昌硕1240000787.zip
+exit=0
+total 14712
+drwxr-xr-x 2 runner runner    4096 Oct 13 14:16 .
+drwxr-xr-x 6 runner runner    4096 Oct 13 14:16 ..
+-rw-r--r-- 1 runner runner 5379608 Oct 13 14:16 Lichangshuo_Assignment2.pdf
+-rw-r--r-- 1 runner runner 4291030 Oct 13 14:16 李昌硕1240000787.zip
+-rw-r--r-- 1 runner runner 5379608 Oct 13 14:16 李昌硕_Assignment2.pdf
