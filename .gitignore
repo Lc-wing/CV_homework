@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env*
+~$*
+/Assignment2.pdf
+/README.pdf
+/cover_template.docx
