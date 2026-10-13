@@ -252,6 +252,24 @@ def detect_blobs(path, sigma_small, sigma_large, neighborhood_size, threshold_re
 
 SELECTED = ["002cell.png", "050cell.png", "100cell.png", "150cell.png"]
 DEFAULT_PARAMETERS = {
+    "background_sigma": 10,
+    "threshold": 0.12,
+    "closing_iterations": 1,
+    "erosion_iterations": 3,
+    "dilation_iterations": 2,
+    "min_area": 15,
+    "max_area": 400,
+}
+# Per-image settings used in the report.
+IMAGE_PARAMETERS = {
+    "002cell.png": dict(DEFAULT_PARAMETERS),
+    "050cell.png": dict(DEFAULT_PARAMETERS),
+    "100cell.png": dict(DEFAULT_PARAMETERS, threshold=0.15),
+    "150cell.png": dict(DEFAULT_PARAMETERS),
+}
+# Starter settings without background flattening, kept as a baseline.
+BASELINE_PARAMETERS = {
+    "background_sigma": 0,
     "threshold": 0.28,
     "closing_iterations": 1,
     "erosion_iterations": 1,
@@ -259,11 +277,9 @@ DEFAULT_PARAMETERS = {
     "min_area": 12,
     "max_area": 400,
 }
-# Per-image settings used in the report.
-IMAGE_PARAMETERS = {name: dict(DEFAULT_PARAMETERS) for name in SELECTED}
 
 # Task 5(a) settings on SELECTED[0].
-SCALE_PAIRS = [(1.5, 2.4), (2.5, 4.0), (3.0, 4.8)]
+SCALE_PAIRS = [(1.5, 2.4), (2.0, 3.2), (2.5, 4.0), (3.0, 4.8), (3.5, 5.6)]
 DOG_SIGMAS = (2.5, 4.0)
 DOG_NEIGHBORHOOD = 9
 DOG_THRESHOLD_REL = 0.30
@@ -309,13 +325,27 @@ def main():
     for rel in (0.1, 0.2, 0.3, 0.4, 0.5):
         n = int(find_blob_maxima(response, neighborhood_size, rel).sum())
         print(f"  DoG threshold_rel = {rel}: {n} maxima")
+    for nb in (5, 7, 9, 11, 13):
+        n = int(find_blob_maxima(response, nb, threshold_rel).sum())
+        print(f"  DoG neighborhood_size = {nb}: {n} maxima")
+
     image = read_gray(blob_path)
     base = image_parameters[blob_path.name]
-    for erosion in (0, 1, 2, 3):
-        mask = morphology_mask(image, base["threshold"], erosion, erosion,
-                               base["closing_iterations"], base.get("background_sigma", 0))
-        n, _, _ = count_components(mask, base["min_area"], base["max_area"])
-        print(f"  morphology erosion = dilation = {erosion}: {n} components")
+
+    def morphology_count(**changes):
+        p = dict(base, **changes)
+        mask = morphology_mask(image, p["threshold"], p["erosion_iterations"],
+                               p["dilation_iterations"], p["closing_iterations"],
+                               p["background_sigma"])
+        return count_components(mask, p["min_area"], p["max_area"])[0]
+
+    for t in (0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.21):
+        print(f"  morphology threshold = {t}: {morphology_count(threshold=t)} components")
+    for e in (1, 2, 3, 4):
+        print(f"  morphology erosion = {e} (dilation 2): "
+              f"{morphology_count(erosion_iterations=e)} components")
+    print(f"  morphology baseline without flattening {BASELINE_PARAMETERS}: "
+          f"{morphology_count(**BASELINE_PARAMETERS)} components")
 
 
 if __name__ == "__main__":
