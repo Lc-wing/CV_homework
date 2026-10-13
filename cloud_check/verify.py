@@ -139,10 +139,11 @@ yy, xx = np.mgrid[:64, :64]
 blob = np.exp(-((xx - 32) ** 2 + (yy - 32) ** 2) / (2 * 3.0 ** 2))
 resp = blob_detection.difference_of_gaussians(blob, 2.5, 4.0)
 check("DoG positive at bright blob center", resp[32, 32] > 0,
-      "response = %.4f, argmax = %s" % (resp[32, 32], np.unravel_index(resp.argmax(), resp.shape)))
+      "response = %.4f, argmax = %s"
+      % (resp[32, 32], tuple(int(v) for v in np.unravel_index(resp.argmax(), resp.shape))))
 m = blob_detection.find_blob_maxima(resp, 9, 0.3)
 check("one maximum on a single synthetic blob", m.sum() == 1 and m[32, 32],
-      "maxima at %s" % list(zip(*np.nonzero(m))))
+      "maxima at %s" % [(int(r), int(c)) for r, c in zip(*np.nonzero(m))])
 
 # (i) Task 5 restrictions.
 src = open("blob_detection.py", encoding="utf-8").read()

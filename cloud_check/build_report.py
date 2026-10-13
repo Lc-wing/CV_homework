@@ -113,10 +113,15 @@ def EQ(tex, size=12.5):
 
 def FIGURE(path, caption, width=PAGE_W, max_h=110 * mm):
     path = FIG / path if not Path(path).is_absolute() else Path(path)
+    jpg = TMP / (path.stem + ".jpg")
     with Image.open(path) as im:
         w, h = im.size
+        background = Image.new("RGB", im.size, (255, 255, 255))
+        rgba = im.convert("RGBA")
+        background.paste(rgba, mask=rgba.split()[3])
+        background.save(jpg, quality=90, optimize=True)
     s = min(width / w, max_h / h)
-    img = RLImage(str(path), width=w * s, height=h * s)
+    img = RLImage(str(jpg), width=w * s, height=h * s)
     return KeepTogether([img, P(caption, "cap")])
 
 
@@ -318,7 +323,6 @@ def story():
         "localisation for robustness to noise."))
 
     # ------------------------------------------------------------ Task 2
-    s.append(PageBreak())
     s.append(P("Task 2: Sobel Operator", "h1"))
     s.append(P("Task 2 (a)  Sobel filtering approximates the derivative of the Gaussian-filtered image", "h2"))
     s.append(P(
@@ -336,16 +340,21 @@ def story():
         "a central difference with step 1 and d<sub>2</sub> = [1 0 0 0 -1] is a central difference with step 2:"))
     s.append(EQ(r"G_S\ast k_x=2\,g^{T}\ast d_1+g^{T}\ast d_2=2\,S_x+g^{T}\ast d_2"))
     s.append(P(
-        "Both terms are a vertical [1 2 1] smoothing followed by a horizontal central difference. Where the image is "
-        "locally linear over a few pixels, I(x+2) - I(x-2) ≈ 2[I(x+1) - I(x-1)], so g<super>T</super> ∗ d<sub>2</sub> acts like "
-        "2S<sub>x</sub>. Therefore"))
-    s.append(EQ(r"\frac{\partial}{\partial x}(I\ast G_S)\;\approx\;\frac{1}{2}(I\ast G_S)\ast k_x\;\approx\;2\,(I\ast S_x)"))
+        "Both terms are a vertical [1 2 1] smoothing followed by a horizontal central difference, so both measure the "
+        "same horizontal derivative of the vertically smoothed image. Only the step size differs. If the image is "
+        "locally linear over a few pixels, I(x+2) - I(x-2) = 2[I(x+1) - I(x-1)], so g<super>T</super> ∗ d<sub>2</sub> "
+        "acts like 2S<sub>x</sub>. At an ideal step edge both differences equal the step height, so it acts like "
+        "S<sub>x</sub>. In both cases the extra term points the same way as S<sub>x</sub>, and therefore"))
+    s.append(EQ(r"\frac{\partial}{\partial x}(I\ast G_S)\;\approx\;\frac{1}{2}(I\ast G_S)\ast k_x\;\approx\;c\,(I\ast S_x),"
+                r"\qquad c\in[1.5,\,2]"))
     s.append(P(
-        "Up to a constant factor (irrelevant for edge detection, and absorbed by normalising G<sub>S</sub> by 1/16), the "
+        "Up to a positive constant (irrelevant for edge detection, and absorbed by normalising G<sub>S</sub> by 1/16), the "
         "Sobel filter computes the horizontal derivative of the G<sub>S</sub>-smoothed image. In effect it is the 3×3 "
         "truncation of the 3×5 kernel. The same argument with k<sub>y</sub> gives S<sub>y</sub>. On grace_hopper.png, "
-        f"the correlation between I ∗ S<sub>x</sub> and (I ∗ G<sub>S</sub>) ∗ k<sub>x</sub> is {t2['corr']:.4f}, and the "
-        f"least-squares ratio between them is {t2['ratio']:.2f} (≈ 4 as predicted)."))
+        f"the correlation between I ∗ S<sub>x</sub> and (I ∗ G<sub>S</sub>) ∗ k<sub>x</sub> is {t2['corr']:.4f}. The "
+        f"least-squares ratio (I ∗ G<sub>S</sub>) ∗ k<sub>x</sub> / (I ∗ S<sub>x</sub>) is {t2['ratio']:.2f}, i.e. "
+        "essentially the step-edge value 3 (2c with c = 1.5; a smooth ramp would give 4). This shows that the strong "
+        "gradients in the photograph come from sharp edges."))
     s.append(FIGURE("t2a_compare.png", "Figure 6. I ∗ S<sub>x</sub> (left) and (I ∗ G<sub>S</sub>) ∗ k<sub>x</sub> (right) are visually the same.",
                     max_h=70 * mm))
     s.append(P("Task 2 (b)  sobel_operator()", "h2"))
@@ -361,7 +370,6 @@ def story():
         "built-in [1 2 1] smoothing."))
 
     # ------------------------------------------------------------ Task 3
-    s.append(PageBreak())
     s.append(P("Task 3: LoG Filter", "h1"))
     s.append(P("Task 3 (a)  The two LoG filters", "h2"))
     L1, L2 = t3["L1"], t3["L2"]
@@ -375,7 +383,7 @@ def story():
         f"kernel_LoG1 is the 4-neighbour discrete Laplacian (sum {t3['sum1']}). It is the LoG at the smallest possible "
         "scale, with essentially no smoothing. Its response (range "
         f"{L1['min']:.0f} to {L1['max']:.0f}) is sharp and noisy: it highlights single-pixel noise and grain, fine texture "
-        "such as hair, and thin double lines along every edge. kernel_LoG2 (sum {t3['sum2']}, close to 0 relative to its "
+        f"such as hair, and thin double lines along every edge. kernel_LoG2 (sum {t3['sum2']}, close to 0 relative to its "
         "weights) is a sampled Laplacian of a Gaussian with σ of roughly 1.4 px: a negative centre surrounded by a "
         f"positive ring. Its response (range {L2['min']:.0f} to {L2['max']:.0f}, larger only because its weights are larger) "
         "is much smoother. Pixel noise is averaged away, and strong responses appear as thick bands along significant "
@@ -417,7 +425,6 @@ def story():
         "G<sub>√(σ1²+σ2²)</sub>), so the LoG at many scales comes almost for free from subtractions."))
 
     # ------------------------------------------------------------ Task 4
-    s.append(PageBreak())
     s.append(P("Task 4: Harris Corner Detector", "h1"))
     s.append(P("Task 4 (a)  Implementation", "h2"))
     s.append(P(
@@ -505,8 +512,8 @@ def story():
         "3. <i>Closing</i> (dilate, then erode; 1 iteration) fills pinholes and dark gaps inside cells, so later "
         "erosion does not break one cell into pieces.<br/>"
         "4. <i>Erosion</i> (3 iterations) removes isolated noise pixels and cuts the narrow bridges where touching cells meet. "
-        "<i>Dilation</i> (2 iterations) then grows the surviving cores back. With equal counts, steps 4a and 4b would be an exact "
-        "opening. Using one fewer dilation keeps a one-pixel gap between cores that the erosion separated, so they are not "
+        "<i>Dilation</i> (2 iterations) then grows the surviving cores back. With equal iteration counts, this erosion and "
+        "dilation would form an exact opening. Using one fewer dilation keeps a one-pixel gap between cores that the erosion separated, so they are not "
         "re-merged.<br/>"
         "5. <i>Structuring element:</i> a 3×3 cross (4-connectivity). Iterating it n times acts like a diamond of radius n, "
         "which is a cheap approximation of a disk matching the round cells.<br/>"
@@ -516,14 +523,14 @@ def story():
     s.append(FIGURE("task5b_baseline.png", "Figure 17. Baseline without background flattening (starter threshold "
                     f"{base['params']['threshold']}): the hazy region becomes one giant component.",
                     width=PAGE_W * 0.7, max_h=62 * mm))
-    rows = [["Image", "Background σ", "Threshold", "Closing", "Erosion", "Dilation", "Area range (px)", "Rejected small / large", "Count"]]
+    rows = [["Image", "Bg σ", "Thresh.", "Close", "Erode", "Dilate", "Area (px)", "Rejected small / large", "Count"]]
     for fname in bd.SELECTED:
         d = t5b[fname]
         p = d["params"]
         rows.append([fname, p["background_sigma"], p["threshold"], p["closing_iterations"], p["erosion_iterations"],
                      p["dilation_iterations"], f"{p['min_area']}-{p['max_area']}",
                      f"{d['rejected_small']} / {d['rejected_large']}", f"<b>{d['count']}</b>"])
-    s.append(TABLE(rows, [PAGE_W * w for w in (0.13, 0.11, 0.1, 0.08, 0.08, 0.08, 0.13, 0.17, 0.08)]))
+    s.append(TABLE(rows, [PAGE_W * w for w in (0.15, 0.07, 0.09, 0.08, 0.08, 0.08, 0.12, 0.22, 0.09)]))
     s.append(P("Table 1. Morphology parameters and final counts (iterations of the 3×3 cross; 001cell.png not used).", "cap"))
     for i, fname in enumerate(bd.SELECTED):
         d = t5b[fname]

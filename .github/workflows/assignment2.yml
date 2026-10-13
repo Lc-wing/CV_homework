@@ -62,11 +62,14 @@ jobs:
         shell: bash {0}
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends libreoffice-writer fonts-noto-cjk fonts-liberation > /dev/null
+          sudo apt-get install -y -qq --no-install-recommends libreoffice-writer fonts-noto-cjk fonts-liberation poppler-utils > /dev/null
           pip install -q reportlab python-docx pypdf
           python cloud_check/build_report.py > cloud_check/run_logs/build_report.txt 2>&1
           echo "exit=$?" >> cloud_check/run_logs/build_report.txt
+          ls -la cloud_check/report >> cloud_check/run_logs/build_report.txt
           cat cloud_check/run_logs/build_report.txt
+          mkdir -p cloud_check/report/pages
+          pdftoppm -r 45 -png cloud_check/report/Lichangshuo_Assignment2.pdf cloud_check/report/pages/p
 
       - name: Publish outputs to assignment2-ci
         run: |
