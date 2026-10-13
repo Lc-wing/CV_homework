@@ -1,0 +1,21 @@
+Task 5(b): morphology cell counting
+002cell.png: 14 cells  {'threshold': 0.28, 'closing_iterations': 1, 'erosion_iterations': 1, 'dilation_iterations': 1, 'min_area': 12, 'max_area': 400}
+050cell.png: 13 cells  {'threshold': 0.28, 'closing_iterations': 1, 'erosion_iterations': 1, 'dilation_iterations': 1, 'min_area': 12, 'max_area': 400}
+100cell.png: 25 cells  {'threshold': 0.28, 'closing_iterations': 1, 'erosion_iterations': 1, 'dilation_iterations': 1, 'min_area': 12, 'max_area': 400}
+150cell.png: 11 cells  {'threshold': 0.28, 'closing_iterations': 1, 'erosion_iterations': 1, 'dilation_iterations': 1, 'min_area': 12, 'max_area': 400}
+Task 5(a): DoG blob detection on 002cell.png
+  sigma = (1.5, 2.4), neighborhood = 9, threshold_rel = 0.3: 185 DoG maxima
+  sigma = (2.5, 4.0), neighborhood = 9, threshold_rel = 0.3: 167 DoG maxima
+  sigma = (3.0, 4.8), neighborhood = 9, threshold_rel = 0.3: 150 DoG maxima
+002cell.png: 167 DoG maxima (selected sigma = (2.5, 4.0))
+Task 5(c): 002cell.png: DoG maxima = 167, morphology components = 14
+  DoG threshold_rel = 0.1: 167 maxima
+  DoG threshold_rel = 0.2: 167 maxima
+  DoG threshold_rel = 0.3: 167 maxima
+  DoG threshold_rel = 0.4: 149 maxima
+  DoG threshold_rel = 0.5: 107 maxima
+  morphology erosion = dilation = 0: 15 components
+  morphology erosion = dilation = 1: 14 components
+  morphology erosion = dilation = 2: 14 components
+  morphology erosion = dilation = 3: 16 components
+exit=0

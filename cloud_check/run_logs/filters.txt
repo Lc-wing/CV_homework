@@ -1,0 +1,49 @@
+./image_patches/q1_patch.png is saved!
+Task 1(a): max |G - Gy Gx| = 1.110e-16
+Task 1(a): max |I*G - (I*Gy)*Gx| = 1.137e-13
+Task 1(c): 3x3 Gaussian kernel, sigma = 0.572
+ [[0.0229 0.1055 0.0229]
+ [0.1055 0.4864 0.1055]
+ [0.0229 0.1055 0.0229]]
+./gaussian_filter/q2_gaussian.png is saved!
+./gaussian_filter/q2_original_plot.png is saved!
+./gaussian_filter/q2_gaussian_plot.png is saved!
+Task 1(d): sum of 3x3 kernel, sigma = 0.572: 1.000089
+Task 1(d): sum of 3x3 kernel, sigma = 2 (not normalized): 0.304192
+Task 1(d) original: min = 0.0000, max = 255.0000, range = 255.0000, mean = 95.5564
+Task 1(d) sigma = 0.572 (raw): min = 3.0593, max = 248.3506, range = 245.2913, mean = 95.4555
+Task 1(d) sigma = 0.572 (sum = 1): min = 3.0590, max = 248.3286, range = 245.2696, mean = 95.4470
+Task 1(d) sigma = 2 (not normalized): min = 1.2210, max = 74.9660, range = 73.7450, mean = 28.9974
+./gaussian_filter/q2d_sigma0572_norm.png is saved!
+./gaussian_filter/q2d_sigma2_raw.png is saved!
+./gaussian_filter/q3_edge.png is saved!
+./gaussian_filter/q3_edge_gaussian.png is saved!
+./gaussian_filter/q3_edge_plot.png is saved!
+./gaussian_filter/q3_edge_gaussian_plot.png is saved!
+Task 1(g) edge, original: min = 0.0000, max = 295.4810, range = 295.4810, mean = 22.6539
+Task 1(g) edge, Gaussian filtered: min = 0.0000, max = 238.9752, range = 238.9752, mean = 19.0450
+Gaussian Filter is done. 
+Task 2(a): GS * kx =
+ [[ 1  2  0 -2 -1]
+ [ 2  4  0 -4 -2]
+ [ 1  2  0 -2 -1]]
+./sobel_operator/q2_Gx.png is saved!
+./sobel_operator/q2_Gy.png is saved!
+./sobel_operator/q2_edge_sobel.png is saved!
+Task 2(a): correlation between I*Sx and (I*GS)*kx = 0.9649
+./sobel_operator/q2_Gx_plot.png is saved!
+./sobel_operator/q2_Gy_plot.png is saved!
+./sobel_operator/q2_edge_sobel_plot.png is saved!
+Sobel Operator is done. 
+./log_filter/q1_LoG1.png is saved!
+./log_filter/q1_LoG2.png is saved!
+./log_filter/q1_LoG1_abs.png is saved!
+./log_filter/q1_LoG2_abs.png is saved!
+Task 3(a): kernel sums: LoG1 = 0, LoG2 = 4
+Task 3(a) LoG1 response: min = -350.0000, max = 331.0000, range = 681.0000, mean = -0.7228
+Task 3(a) LoG2 response: min = -29750.0000, max = 26177.0000, range = 55927.0000, mean = 272.5620
+Task 3(b): best scale = 0.8724, relative L2 error of scaled DoG vs LoG = 0.0458
+Task 3(b): sums: log50 = -7.101e-07, gauss50 = 1.0000, gauss53 = 1.0000, DoG = 2.377e-16
+./log_filter/q2_dog_vs_log.png is saved!
+LoG Filter is done. 
+exit=0
