@@ -64,8 +64,8 @@ def morphology_sweep(name):
         row = [bd.count_components(bd.morphology_mask(image, t, e, e, 1), 12, 400)[0] for e in range(4)]
         print(f"  {t:.2f}     | {row}")
 
-    for bg in (10, 15, 25):
-        flat = image - bd.gaussian_filter(image, bg)
+    flats = {bg: image - bd.gaussian_filter(image, bg) for bg in (10, 15, 20)}
+    for bg, flat in flats.items():
         print(f"background_sigma {bg}: flattened p50 {np.percentile(flat, 50):.3f} "
               f"p75 {np.percentile(flat, 75):.3f} p90 {np.percentile(flat, 90):.3f} "
               f"max {flat.max():.3f} otsu-ish {otsu(np.clip(flat + 0.5, 0, 1)) - 0.5:.3f}")
@@ -73,7 +73,7 @@ def morphology_sweep(name):
         for t in [0.0, 0.03, 0.06, 0.09, 0.12, 0.15]:
             row = []
             for e in range(4):
-                mask = bd.morphology_mask(image, t, e, e, 1, bg)
+                mask = bd.morphology_mask(flat, t, e, e, 1)
                 n, labels, kept = bd.count_components(mask, 12, 400)
                 row.append(n)
                 if e == 1:
@@ -89,7 +89,7 @@ def morphology_sweep(name):
     fig, axs = plt.subplots(len(show_t), len(show_e), figsize=(4 * len(show_e), 4 * len(show_t)))
     for i, t in enumerate(show_t):
         for j, e in enumerate(show_e):
-            mask = bd.morphology_mask(image, t, e, e, 1, bg)
+            mask = bd.morphology_mask(flats[bg], t, e, e, 1)
             n, labels, kept = bd.count_components(mask, 12, 400)
             axs[i, j].imshow(label_overlay(image, labels, kept), interpolation="nearest")
             axs[i, j].set_title(f"bg={bg} t={t:.2f} e=d={e}: {n}")
