@@ -93,6 +93,8 @@ kx = np.array([[1, 0, -1]])
 smooth_dx = filters.convolve(filters.convolve(img, GS), kx)
 results["t2"] = {
     "corr": float(np.corrcoef(Gx[2:-2, 2:-2].ravel(), smooth_dx[2:-2, 2:-2].ravel())[0, 1]),
+    "ratio": float(np.dot(smooth_dx[2:-2, 2:-2].ravel(), Gx[2:-2, 2:-2].ravel())
+                   / np.dot(Gx[2:-2, 2:-2].ravel(), Gx[2:-2, 2:-2].ravel())),
     "Gx": stats(Gx), "Gy": stats(Gy), "mag": stats(mag),
 }
 lim = float(np.percentile(np.abs(Gx), 99.5))
@@ -128,6 +130,8 @@ data = np.load("log1d.npz")
 dog = data["gauss53"] - data["gauss50"]
 scale = float(np.dot(dog, data["log50"]) / np.dot(dog, dog))
 results["t3"]["dog_scale"] = scale
+results["t3"]["dog_sum"] = float(dog.sum())
+results["t3"]["log_sum"] = float(data["log50"].sum())
 results["t3"]["dog_rel_err"] = float(np.linalg.norm(scale * dog - data["log50"]) / np.linalg.norm(data["log50"]))
 results["t3"]["log50_center"] = float(data["log50"][len(dog) // 2])
 results["t3"]["dog_center"] = float(dog[len(dog) // 2])
