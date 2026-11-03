@@ -1,4 +1,4 @@
-from utils import dehomogenize, homogenize, draw_epipolar, visualize_pcd
+from utils import homogenize, draw_epipolar, visualize_pcd
 import numpy as np
 import cv2
 import pdb
@@ -28,9 +28,41 @@ def find_fundamental_matrix(shape, pts1, pts2):
 
     #This will give you an answer you can compare with
     #Your answer should match closely once you've divided by the last entry
-    FOpenCV, _ = cv2.findFundamentalMat(pts1, pts2, cv2.FM_8POINT)
+    _FOpenCV, _ = cv2.findFundamentalMat(pts1, pts2, cv2.FM_8POINT)
 
-    F = np.eye(3)
+    pts1 = np.asarray(pts1, dtype=float)
+    pts2 = np.asarray(pts2, dtype=float)
+
+    def normalizing_transform(pts):
+        """Center the points at 0 and scale them to mean distance sqrt(2).
+
+        shape gives the image size. The translation uses the point centroid,
+        and the scale uses the image diagonal so coordinates from a large
+        image are brought near unit size (Hartley normalization, with the
+        image diagonal as a reference when the point spread is degenerate).
+        """
+        center = pts.mean(axis=0)
+        mean_dist = np.sqrt(((pts - center) ** 2).sum(axis=1)).mean()
+        height, width = shape[:2]
+        image_scale = 1.0 / np.sqrt(height ** 2 + width ** 2)
+        scale = np.sqrt(2.0) / mean_dist if mean_dist > 1e-12 else image_scale
+        return np.array([[scale, 0.0, -scale * center[0]],
+                         [0.0, scale, -scale * center[1]],
+                         [0.0, 0.0, 1.0]])
+
+    T1 = normalizing_transform(pts1)
+    T2 = normalizing_transform(pts2)
+    p1 = (T1 @ homogenize(pts1).T).T
+    p2 = (T2 @ homogenize(pts2).T).T
+    # One row per correspondence: [u', v', 1] kron [u, v, 1].
+    design = np.einsum("ni,nj->nij", p2, p1).reshape(pts1.shape[0], 9)
+    _, _, vt = np.linalg.svd(design)
+    F = vt[-1].reshape(3, 3)
+    # Closest rank-2 matrix.
+    u_mat, singular, vt = np.linalg.svd(F)
+    singular[-1] = 0.0
+    F = u_mat @ np.diag(singular) @ vt
+    F = T2.T @ F @ T1
     return F
 
 
@@ -48,13 +80,10 @@ def compute_epipoles(F):
     - e1: the epipole for image 1 in homogeneous coordinates
     - e2: the epipole for image 2 in homogeneous coordinates
     """
-    ###########################################################################
-    # TODO: Your code here                                                    #
-    ###########################################################################
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
-
+    # e1 is the right null vector (F e1 = 0); e2 is the left null vector.
+    u_mat, _, vt = np.linalg.svd(F)
+    e1 = vt[-1]
+    e2 = u_mat[:, -1]
     return e1, e2
 
 
@@ -79,13 +108,54 @@ def find_triangulation(K1, K2, F, pts1, pts2):
     - pcd: Numpy array of shape (N,4) giving the homogeneous 3D point cloud
       data
     """
-    pcd = None
-    ###########################################################################
-    # TODO: Your code here                                                    #
-    ###########################################################################
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    K1 = np.asarray(K1, dtype=float)
+    K2 = np.asarray(K2, dtype=float)
+    pts1 = np.asarray(pts1, dtype=float)
+    pts2 = np.asarray(pts2, dtype=float)
+    essential = K2.T @ F @ K1
+    u_mat, _, vt = np.linalg.svd(essential)
+    if np.linalg.det(u_mat) < 0:
+        u_mat = -u_mat
+    if np.linalg.det(vt) < 0:
+        vt = -vt
+    W = np.array([[0.0, -1.0, 0.0],
+                  [1.0, 0.0, 0.0],
+                  [0.0, 0.0, 1.0]])
+    candidates = [
+        (u_mat @ W @ vt, u_mat[:, 2]),
+        (u_mat @ W @ vt, -u_mat[:, 2]),
+        (u_mat @ W.T @ vt, u_mat[:, 2]),
+        (u_mat @ W.T @ vt, -u_mat[:, 2]),
+    ]
+
+    def linear_triangulation(M1, M2):
+        points = []
+        for (u, v), (uu, vv) in zip(pts1, pts2):
+            design = np.vstack([
+                u * M1[2] - M1[0],
+                v * M1[2] - M1[1],
+                uu * M2[2] - M2[0],
+                vv * M2[2] - M2[1],
+            ])
+            _, _, point_vt = np.linalg.svd(design)
+            point = point_vt[-1]
+            points.append(point / point[3])
+        return np.asarray(points)
+
+    best = None
+    for rotation, translation in candidates:
+        if np.linalg.det(rotation) < 0:
+            rotation = -rotation
+            translation = -translation
+        M1 = K1 @ np.hstack([np.eye(3), np.zeros((3, 1))])
+        M2 = K2 @ np.hstack([rotation, translation.reshape(3, 1)])
+        cloud = linear_triangulation(M1, M2)
+        depth1 = cloud[:, 2]
+        depth2 = (rotation @ cloud[:, :3].T).T + translation
+        in_front = np.sum((depth1 > 0) & (depth2[:, 2] > 0))
+        if best is None or in_front > best[0]:
+            best = (in_front, cloud)
+    pcd = best[1]
     return pcd
 
 

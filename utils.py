@@ -80,8 +80,8 @@ def drawlines(img1, img2, lines, pts1, pts2):
 
     H, W = img1.shape[0], img1.shape[1]
 
-    X, Y = np.meshgrid(np.arange(W).astype(np.float),
-                       np.arange(H).astype(np.float))
+    X, Y = np.meshgrid(np.arange(W).astype(float),
+                       np.arange(H).astype(float))
 
     for ii, (r, pt1, pt2) in enumerate(zip(lines, pts1, pts2)):
         color = colorsUse[ii]
